@@ -1,0 +1,70 @@
+机器:
+10.10.96.210 lst
+10.10.96.211 lst1
+10.10.96.212 lst2
+且zookeeper集群环境已经搭好
+
+lst
+1.官网 : kafka_2.12-1.1.0.tgz
+2.解压 : sudo tar -zxvf kafka_2.12-1.1.0.tgz
+	
+3. vim /data/kafka_2.12-1.1.0/config/server.properties
+
+	3.1 
+		broker.id=0   
+		host.name=10.10.96.210  
+
+        3.2    	####Log Retention Policy#####
+		
+		message.max.byte=5242880
+		default.replication.factor=2
+		replica.fetch.max.bytes=5242880
+
+	3.3     log.dirs=/data/kafka_2.12-1.1.0/data     ==>>>>>需要创建该目录,如果权限不够,给777权限, sudo chmod 777 /data/kafka_2.12-1.1.0/data
+
+	3.4  	zookeeper.connect=10.10.96.210:2181,10.10.96.211:2181,10.10.96.212:2181
+	
+   
+4. 拷贝另外两台
+
+sudo scp kafka_2.12-1.1.0 lst@10.10.96.211:/data
+-server.properties
+		broker.id=1   
+		host.name=10.10.96.211
+sudo scp kafka_2.12-1.1.0 lst@10.10.96.212:/data
+-server.properties
+		broker.id=2   
+		host.name=10.10.96.212
+
+5.启动kafka
+#bin/zookeeper-server-start.sh config/zookeeper.properties   //该命令用于启动 kafka自带的zookeeper
+bin/kafka-server-start.sh config/server.properties
+========================================================================================
+6.测试是否成功:
+6.1 创建topic
+bin/kafka-topics.sh --create --zookeeper 10.10.96.210:2181,10.10.96.211:2181,10.10.96.212:2181 --replication-factor 2 --partitions 1 --topic test
+
+6.2 查看已经创建的topic
+bin/kafka-topics.sh --list --zookeeper 10.10.96.210:2181,10.10.96.211:2181,10.10.96.212:2181
+
+6.3 查看topic状态
+bin/kafka-topics.sh --describe --zookeeper 10.10.96.210:2181,10.10.96.211:2181,10.10.96.212:2181 --topic test
+
+6.4 创建消费者
+bin/kafka-console-consumer.sh --bootstrap-server 10.10.96.211:9092 --topic test --from-beginning
+
+bin/kafka-console-consumer.sh --bootstrap-server 10.10.96.212:9092 --topic test --from-beginning
+
+6.5 创建生产者
+
+bin/kafka-console-producer.sh --broker-list 10.10.96.210:9092 --topic test
+
+
+注意: 如果是单机运行,zookeeper 和  kafka 只要保持默认的配置即可
+server.properties中的localhost要改成 主机ip(10.10.92.233) , 否则报异常:  could not be established. Broker may not be available. (org.apache.kafka.clients.NetworkClient)  
+
+
+bin/kafka-console-producer.sh --broker-list 10.10.96.210:9092 --topic topic-test
+bin/kafka-console-consumer.sh --bootstrap-server 10.10.96.212:9092 --topic topic-test --from-beginning
+
+

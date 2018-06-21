@@ -1,0 +1,40 @@
+机器:
+10.10.96.210 lst
+10.10.96.211 lst1
+10.10.96.212 lst2
+
+1. 去官网下载最新的版本: zookeeper-3.5.4-beta.tar.gz
+2. 解压:  tar -zxvf zookeeper-3.5.4-beta.tar.gz
+3. cd /data/zookeeper-3.5.4-beta/conf
+4. cp zoo_sample.cfg zoo.cfg
+5. vim /data/zookeeper-3.5.4-beta/conf/zoo.cfg
+	5.1在最低下加入配置:
+		server.0=10.10.96.210:2888:3888
+		server.1=10.10.96.211:2888:3888
+		server.2=10.10.96.212:2888:3888
+
+	5.2  dataDir=/data/zookeeper-3.5.4-beta/data  ==>>> 需要创建该目录,如果权限不够,给777权限, sudo chmod 777 /data/zookeeper-3.5.4-beta/data
+6. 在/data 目录下创建  myid文件
+	-myid
+		0
+7. 拷贝值另外两台
+	sudo scp zookeeper-3.5.4-beta lst@10.10.96.211:/data
+	修改
+	-myid
+		1
+
+	sudo scp zookeeper-3.5.4-beta lst@10.10.96.212:/data
+	修改
+	-myid
+		2
+
+8. 分别启动zookeeper
+	cd /data/zookeeper-3.5.4-beta/bin
+	
+	./zkServer.sh start   - 启动
+	./zkServer.sh status  - 查看状态
+
+
+
+
+

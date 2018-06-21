@@ -1,0 +1,39 @@
+机器:
+10.10.96.210 lst
+10.10.96.211 lst1
+10.10.96.212 lst2
+且zookeeper集群环境已经搭好
+
+1.去官网下载最新版本: apache-storm-1.2.2.tar.gz
+2.tar -zxvf apache-storm-1.2.2.tar.gz
+3.vim /data/apache-storm-1.2.2/conf/storm.yaml
+添加如下内容:
+ storm.zookeeper.servers:
+     - "10.10.96.210"
+     - "10.10.96.211"
+     - "10.10.96.212"
+
+ nimbus.seeds: ["10.10.96.210"]
+ storm.local.dir: "/data/apache-storm-1.2.2/data"   ==>>> 需要创建该目录,如果权限不够,给777权限, sudo chmod 777 /data/apache-storm-1.2.2/data
+ ui.port:  9090
+ supervisor.slots.ports:
+     - 6700
+     - 6701
+     - 6702
+     - 6703
+
+4. 拷贝值另外两台
+
+sudo scp apache-storm-1.2.2 lst@10.10.96.211:/data
+sudo scp apache-storm-1.2.2 lst@10.10.96.212:/data
+
+5. 分别启动
+-10.10.96.210  启动 nimbus , ui   ==> nohup ./storm nimbus &     ==> nohop ./storm ui &
+-10.10.96.211  启动 supervisor    ==> nohup ./storm supervisor &
+-10.10.96.212  启动 supervisor    ==> nohup ./storm supervisor &
+
+6. 通过web页面监控:  10.10.96.210:9090
+
+
+
+
